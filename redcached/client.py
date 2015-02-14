@@ -1,4 +1,4 @@
-# -*- conding: utf-8 -*-
+#-*- conding: utf-8 -*-
 
 # python std library
 import json
@@ -26,8 +26,8 @@ class Client(memcache.Client):
             val = self._get_value_from_json(json_val, KEY_TYPE_HSET)
         else:
             val = {}
-            val[KEY_TYPE_FIELD] = KEY_TYPE_HSET
         val[field] = value
+        val[KEY_TYPE_FIELD] = KEY_TYPE_HSET
         return Client.SUCCESS if self.set(key, json.dumps(val)) else Client.FAILED
 
     def hsetnx(self, key, field, value):
@@ -36,9 +36,9 @@ class Client(memcache.Client):
             val = self._get_value_from_json(json_val, KEY_TYPE_HSET)
         else:
             val = {}
-            val[KEY_TYPE_FIELD] = KEY_TYPE_HSET
         if field not in val:
             val[field] = value
+            val[KEY_TYPE_FIELD] = KEY_TYPE_HSET
             return Client.SUCCESS if self.set(key, json.dumps(val)) else Client.FAILED
         return Client.FAILED
 
@@ -92,6 +92,7 @@ class Client(memcache.Client):
                     ret = Client.SUCCESS
                     val.pop(field)
             if ret is Client.SUCCESS:
+                val[KEY_TYPE_FIELD] = KEY_TYPE_HSET
                 self.set(key, json.dumps(val))
         return ret
 
@@ -109,7 +110,7 @@ class Client(memcache.Client):
                 val[field] = increment
         else:
             val = { field: increment }
-            val[KEY_TYPE_FIELD] = KEY_TYPE_HSET
+        val[KEY_TYPE_FIELD] = KEY_TYPE_HSET
         return Client.SUCCESS if self.set(key, json.dumps(val)) else Client.FAILED
 
     def hincrbyfloat(self, key, field, increment):
@@ -126,7 +127,7 @@ class Client(memcache.Client):
                 val[field] = increment
         else:
             val = { field: increment }
-            val[KEY_TYPE_FIELD] = KEY_TYPE_HSET
+        val[KEY_TYPE_FIELD] = KEY_TYPE_HSET
         return Client.SUCCESS if self.set(key, json.dumps(val)) else Client.FAILED
 
     def hmget(self, key, *fields):
@@ -146,9 +147,9 @@ class Client(memcache.Client):
             val = self._get_value_from_json(json_val, KEY_TYPE_HSET)
         else:
             val = {}
-            val[KEY_TYPE_FIELD] = KEY_TYPE_HSET
         for k, v in mapping.iteritems():
             val[k] = v
+        val[KEY_TYPE_FIELD] = KEY_TYPE_HSET
         return Client.SUCCESS if self.set(key, json.dumps(val)) else Client.FAILED
 
     def incr(self, key):
