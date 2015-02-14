@@ -1,6 +1,5 @@
 # -*- conding: utf-8 -*-
 
-
 # python std library
 import json
 
@@ -24,6 +23,17 @@ class Client(memcache.Client):
             val = {}
         val[field] = value
         return self.set(key, json.dumps(val)) if Client.SUCCESS else Client.FAILED
+
+     def hsetnx(self, key, field, value):
+        json_val = self.get(key)
+        if json_val is not None:
+            val = json.loads(json_val)
+        else:
+            val = {}
+        if field not in val:
+            val[field] = value
+            return self.set(key, json.dumps(val)) if Client.SUCCESS else Client.FAILED
+        return Client.FAILED
 
     def hget(self, key, field):
         json_val = self.get(key)
@@ -90,8 +100,44 @@ class Client(memcache.Client):
                 val[field] = increment
         else:
             val = { field: increment }
-        return self.set(key, json.dumps(val)) if Client.SUCCESS else Client.FAILED
+        return Client.SUCCESS if self.set(key, json.dumps(val)) else Client.FAILED
 
+    def hincrbyfloat(self, key, field, increment):
+        if not isinstance(increment, (int, float)):
+            raise RedCachedException("value is not an integer or float or out of range")
+        json_val = self.get(key)
+        if json_val is not None:
+            val = json.loads(json_val)
+            if field in val:
+                if not isinstance(val[field], (int, float)):
+                    raise RedCachedException("value is not an integer or out of range") 
+                val[field] = float(val[field]) + increment
+            else:
+                val[field] = increment
+        else:
+            val = { field: increment }
+        return Client.SUCCESS if self.set(key, json.dumps(val)) else Client.FAILED
+
+    def hmget(self, key, *fields):
+        json_val = self.get(key)
+        ret = []
+        if json_val is not None:
+            val = json.loads(json_val)
+            for field in fields:
+                if field in val:
+                    ret.append(val[field])
+            return ret
+        return None
+
+    def hmset(self, key, mapping):
+        json_val = self.get(key)
+        if json_val is not None:
+            val = json.loads(json_val)
+        else:
+            val = {}
+        for k, v in mapping.iteritems():
+            val[k] = v
+        return Client.SUCCESS if self.set(key, json.dumps(val)) else Client.FAILED
 
 class RedCachedException(Exception):
     def __init__(self, message):
