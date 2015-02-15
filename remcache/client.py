@@ -105,8 +105,8 @@ class Client(memcache.Client):
         """
         json_val = self.get(key)
         if json_val is not None:
-            return field in self._get_value_from_json(json_val, KEY_TYPE_HSET)
-        return False
+            return Client.SUCCESS if field in self._get_value_from_json(json_val, KEY_TYPE_HSET) else Client.FAILED
+        return Client.FAILED
 
     def hdel(self, key, *fields):
         """
@@ -117,11 +117,15 @@ class Client(memcache.Client):
         if json_val is not None:
             val = self._get_value_from_json(json_val, KEY_TYPE_HSET)
             for field in fields:
-                if field in val:
+                if str(field) in val:
                     ret = Client.SUCCESS
-                    val.pop(field)
+                    val.pop(str(field))
             if ret is Client.SUCCESS:
-                self.set(key, json.dumps(val))
+                # if key has no values, it is deleted
+                if len(val) == 0:
+                    self.delete(key)
+                else:
+                    self._set_value_to_json(key, val, KEY_TYPE_HSET)
         return ret
 
     def hincrby(self, key, field, increment):
@@ -129,7 +133,7 @@ class Client(memcache.Client):
         Increment the integer value of a hash field by the given number
         """
         if not isinstance(increment, int):
-            raise RemCacheException("value is not an integer or out of range"
+            raise RemCacheException("value is not an integer or out of range")
         json_val = self.get(key)
         if json_val is not None:
             val = self._get_value_from_json(json_val, KEY_TYPE_HSET)
