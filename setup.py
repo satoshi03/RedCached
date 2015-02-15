@@ -2,7 +2,7 @@
 
 try:
   import setuptools
-  from setuptools import setup, find_packages
+  from setuptools import setup
 except ImportError:
   print("Please install setuptools.")
 
@@ -11,14 +11,12 @@ import sys
 import info
 import version
 
-libdir = "."
 
 setup_options = info.INFO
 setup_options["version"] = version.VERSION
 setup_options.update(dict(
   install_requires = open('requirements.txt').read().splitlines(),
-  packages         = find_packages(libdir),
-  package_dir      = {"": libdir},
+  packages         = ['remcache'],
 ))
 
 setup(**setup_options)
