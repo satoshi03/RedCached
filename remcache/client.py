@@ -129,13 +129,13 @@ class Client(memcache.Client):
         Increment the integer value of a hash field by the given number
         """
         if not isinstance(increment, int):
-            raise RedCachedException("value is not an integer or out of range")
+            raise RemCacheException("value is not an integer or out of range"
         json_val = self.get(key)
         if json_val is not None:
             val = self._get_value_from_json(json_val, KEY_TYPE_HSET)
             if field in val:
                 if not isinstance(val[field], int):
-                    raise RedCachedException("value is not an integer or out of range")
+                    raise RemCacheException("value is not an integer or out of range")
                 val[field] = int(val[field]) + increment
             else:
                 val[field] = increment
@@ -148,13 +148,13 @@ class Client(memcache.Client):
         Increment the float value of a hash field by the given amount
         """
         if not isinstance(increment, (int, float)):
-            raise RedCachedException("value is not an integer or float or out of range")
+            raise RemCacheException("value is not an integer or float or out of range")
         json_val = self.get(key)
         if json_val is not None:
             val = self._get_value_from_json(json_val, KEY_TYPE_HSET)
             if field in val:
                 if not isinstance(val[field], (int, float)):
-                    raise RedCachedException("value is not an integer or out of range")
+                    raise RemCacheException("value is not an integer or out of range")
                 val[field] = float(val[field]) + increment
             else:
                 val[field] = increment
@@ -196,7 +196,7 @@ class Client(memcache.Client):
         val = self.get(key)
         if val is not None:
             if not isinstance(val, int):
-                raise RedCachedException("value is not an integer or out of range")
+                raise RemCacheException("value is not an integer or out of range")
             val = int(val) + 1
         else:
             val = 1
@@ -207,11 +207,11 @@ class Client(memcache.Client):
         Increment the integer value of a key by the given amount
         """
         if not isinstance(increment, int):
-            raise RedCachedException("value is not an integer or out of range")
+            raise RemCacheException("value is not an integer or out of range")
         val = self.get(key)
         if val is not None:
             if not isinstance(val, int):
-                raise RedCachedException("value is not an integer or out of range")
+                raise RemCacheException("value is not an integer or out of range")
             val = int(val) + increment
         else:
             val = increment
@@ -222,11 +222,11 @@ class Client(memcache.Client):
         Increment the float value of a key by the given amount
         """
         if not isinstance(increment, (int, float)):
-            raise RedCachedException("value is not an integer or float or out of range")
+            raise RemCacheException("value is not an integer or float or out of range")
         val = self.get(key)
         if val is not None:
             if not isinstance(val, (int, float)):
-                raise RedCachedException("value is not an integer or out of range")
+                raise RemCacheException("value is not an integer or out of range")
             val = float(val) + increment
         else:
             val = increment
@@ -239,7 +239,7 @@ class Client(memcache.Client):
         val = self.get(key)
         if val is not None:
            if not isinstance(val, int):
-                raise RedCachedException("value is not an integer or out of range")
+                raise RemCacheException("value is not an integer or out of range")
            val = int(val) - 1
         else:
             val = -1
@@ -263,7 +263,7 @@ class Client(memcache.Client):
             self.set(key, val)
             return retval
         else:
-            raise RedCachedException("WRONGTYPE Operation against a key holding the wrong kind of value")
+            raise RemCacheException("WRONGTYPE Operation against a key holding the wrong kind of value")
 
     def strlen(self, key):
         """
@@ -275,7 +275,7 @@ class Client(memcache.Client):
         if KEY_TYPE_STRING == self._get_key_type(val):
             return len(str(val))
         else:
-            raise RedCachedException("WRONGTYPE Operation against a key holding the wrong kind of value")
+            raise RemCacheException("WRONGTYPE Operation against a key holding the wrong kind of value")
 
     def set(self, key, val):
         """
@@ -318,11 +318,11 @@ class Client(memcache.Client):
     def _get_value_from_json(self, json_val, key_type):
         try:
             val = json.loads(json_val)
+            if self._is_valid_key_type(val, key_type):
+                return val[VALUE_FIELD]
         except (TypeError, ValueError):
-            raise RedCachedException("WRONGTYPE Operation against a key holding the wrong kind of value")
-        if not self._is_valid_key_type(val, key_type):
-            raise RedCachedException("WRONGTYPE Operation against a key holding the wrong kind of value")
-        return val[VALUE_FIELD]
+            pass
+        raise RemCacheException("WRONGTYPE Operation against a key holding the wrong kind of value")
 
     def _is_valid_key_type(self, val, key_type):
         if KEY_TYPE_FIELD in val:
@@ -344,8 +344,8 @@ class Client(memcache.Client):
         dic[KEY_TYPE_FIELD] = key_type
         return self.set(key, json.dumps(dic))
 
-class RedCachedException(Exception):
+class RemCacheException(Exception):
     def __init__(self, message):
-        super(RedCachedException, self).__init__(message)
+        super(RemCacheException, self).__init__(message)
 
 
