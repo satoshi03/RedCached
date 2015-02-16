@@ -18,10 +18,8 @@ $ sudo python setup.py install
 ## Getting started
 
 <pre>
-import remcache
-
+> import remcache
 > c = remcache.Client(['127.0.0.1:11211'])
-
 > c.set('spam', 10)
 1
 > c.get('spam')
@@ -35,8 +33,7 @@ import remcache
 If you want to store data as hash-field like json format data, use hash methods.
 
 <pre>
-import remcache
-
+> import remcache
 > c = remcache.Client(['127.0.0.1:11211'])
 > c.hset('food', 'spam', 80)
 1
