@@ -30,7 +30,7 @@ import remcache
 11
 > c.incrby('spam', 70)
 81
-<pre>
+</pre>
 
 If you want to store data as hash-field like json format data, use hash methods.
 
