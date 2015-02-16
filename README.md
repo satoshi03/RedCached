@@ -5,7 +5,7 @@ In other words, this memcached client has some methods of redis such as "hash" a
 
 ## How to install
 
-remcache requires a running memcached server.
+remcache requires a running memcached server. To run a server, please refer to [memcache home page](http://memcached.org/)
 
 To install remcache, simply:
 
