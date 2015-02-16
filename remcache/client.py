@@ -292,8 +292,8 @@ class Client(memcache.Client):
         """
         Set the value and expiration of a key
         """
-        val = self.get(key)
-        if val is None:
+        org_val = self.get(key)
+        if org_val is None:
             return self.set(key, val)
         else:
             return Client.FAILED
