@@ -5,6 +5,10 @@ In other words, this memcached client has some methods of redis such as "hash" a
 
 ## How to install
 
+remcache requires a running memcached server.
+
+To install remcache, simply:
+
 <pre>
 $ sudo pip install -U git+https://github.com/satoshi03/RemCache
 </pre>
